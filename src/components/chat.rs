@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use web_sys::HtmlInputElement;
+use web_sys::KeyboardEvent;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged};
 use crate::services::event_bus::EventBus;
@@ -9,6 +10,7 @@ use crate::{User, services::websocket::WebsocketService};
 pub enum Msg {
     HandleMsg(String),
     SubmitMessage,
+    Keypress(KeyboardEvent),
 }
 
 #[derive(Deserialize)]
@@ -91,12 +93,8 @@ impl Component for Chat {
                         self.users = users_from_message
                             .iter()
                             .map(|u| UserProfile {
-                                name: u.into(),
-                                avatar: format!(
-                                    "https://avatars.dicebear.com/api/adventurer-neutral/{}.svg",
-                                    u
-                                )
-                                    .into(),
+                                name: u.clone(),
+                                avatar: u.clone()
                             })
                             .collect();
                         return true;
@@ -133,25 +131,30 @@ impl Component for Chat {
                 };
                 false
             }
+            Msg::Keypress(event) => {
+                self.handle_keypress(event)
+            }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let submit = ctx.link().callback(|_| Msg::SubmitMessage);
+        let keypress = ctx.link().callback(|e: KeyboardEvent| Msg::Keypress(e));
+
         html! {
              <div class="flex w-screen">
-                 <div class="flex-none w-56 h-screen bg-gray-100">
-                     <div class="text-xl p-3">{"Users"}</div>
+                 <div class="flex-none w-56 h-screen bg-neutral-900">
+                     <div class="text-xl p-3 text-neutral-50">{"Users"}</div>
                      {
-                         self.users.clone().iter().map(|u| {
+                         self.users.iter().map(|user| {
                              html!{
-                                 <div class="flex m-3 bg-white rounded-lg p-2">
+                                 <div class="flex m-3 bg-black rounded-lg p-2">
                                      <div>
-                                         <img class="w-12 h-12 rounded-full" src={u.avatar.clone()} alt="avatar"/>
+                                         <img class="w-12 h-12 rounded-full" src={format!("https://api.dicebear.com/8.x/notionists/svg?seed={}", user.avatar)} alt="avatar"/>
                                      </div>
                                      <div class="flex-grow p-3">
-                                         <div class="flex text-xs justify-between">
-                                             <div>{u.name.clone()}</div>
+                                         <div class="flex text-xs justify-between text-neutral-50">
+                                             <div>{&user.name}</div>
                                          </div>
                                          <div class="text-xs text-gray-400">
                                              {"Hi there!"}
@@ -162,22 +165,22 @@ impl Component for Chat {
                          }).collect::<Html>()
                      }
                  </div>
-                 <div class="grow h-screen flex flex-col">
-                     <div class="w-full h-14 border-b-2 border-gray-300"><div class="text-xl p-3">{"💬 Chat!"}</div></div>
+                 <div class="grow h-screen flex flex-col bg-neutral-800">
+                     <div class="w-full h-14 border-b-2 border-gray-300"><div class="text-xl p-3 text-neutral-50">{"💬 Let's Chat!"}</div></div>
                      <div class="w-full grow overflow-auto border-b-2 border-gray-300">
                          {
                              self.messages.iter().map(|m| {
                                  let user = self.users.iter().find(|u| u.name == m.from).unwrap();
                                  html!{
-                                     <div class="flex items-end w-3/6 bg-gray-100 m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg ">
-                                         <img class="w-8 h-8 rounded-full m-3" src={user.avatar.clone()} alt="avatar"/>
+                                     <div class="flex items-end w-3/6 bg-black m-8 rounded-tl-lg rounded-tr-lg rounded-br-lg ">
+                                         <img class="w-8 h-8 rounded-full m-3" src={format!("https://api.dicebear.com/8.x/notionists/svg?seed={}", user.avatar)} alt="avatar"/>
                                          <div class="p-3">
-                                             <div class="text-sm">
+                                             <div class="text-sm text-neutral-50">
                                                  {m.from.clone()}
                                              </div>
-                                             <div class="text-xs text-gray-500">
+                                             <div class="text-xs text-gray-500 bg-black">
                                                  if m.message.ends_with(".gif") {
-                                                     <img class="mt-3" src={m.message.clone()}/>
+                                                     <img class="mt-3 bg-black" src={m.message.clone()}/>
                                                  } else {
                                                      {m.message.clone()}
                                                  }
@@ -190,15 +193,50 @@ impl Component for Chat {
 
                      </div>
                      <div class="w-full h-14 flex px-3 items-center">
-                         <input ref={self.chat_input.clone()} type="text" placeholder="Message" class="block w-full py-2 pl-4 mx-3 bg-gray-100 rounded-full outline-none focus:text-gray-700" name="message" required=true />
-                         <button onclick={submit} class="p-3 shadow-sm bg-blue-600 w-10 h-10 rounded-full flex justify-center items-center color-white">
-                             <svg fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="fill-white">
-                                 <path d="M0 0h24v24H0z" fill="none"></path><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                         <input ref={self.chat_input.clone()} type="text" placeholder="Message" class="block w-full py-2 pl-4 mx-3 bg-black rounded-full outline-none focus:text-neutral-400" name="message" required=true onkeypress={keypress}/>
+                         <button onclick={submit} class="p-3 shadow-sm bg-neutral-600 w-10 h-10 rounded-full flex justify-center items-center color-white">
+                             <svg fill="#FFFFFF" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="fill-white">
+                                 <path d="M0 0h24v24H0z" fill="none"></path>
+                                 <path fill="#FFFFFF" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
                              </svg>
                          </button>
                      </div>
                  </div>
              </div>
          }
+    }
+}
+
+impl Chat {
+    fn handle_keypress(&self, event: KeyboardEvent) -> bool {
+        if event.key_code() == 13 {
+            self.submit_message();
+            true
+        } else {
+            false
+        }
+    }
+
+    fn submit_message(&self) {
+        let input = self.chat_input.cast::<HtmlInputElement>();
+        if let Some(input) = input {
+            let message = WebSocketMessage {
+                message_type: MsgTypes::Message,
+                data: Some(input.value()),
+                data_array: None,
+            };
+            if let Err(e) = self
+                .wss
+                .tx
+                .clone()
+                .try_send(serde_json::to_string(&message).unwrap())
+            {
+                log::debug!("error sending to channel: {:?}", e);
+            }
+            input.set_value("");
+        }
+    }
+    fn keypress(&self, event: KeyboardEvent) -> Msg {
+        Msg::Keypress(event)
     }
 }
