@@ -1,21 +1,12 @@
-# YewChat 💬
+# Advance Programming Tutorial 10
+Tutorial for Advanced Programming 2024 Module 10 - Faculty of Computer Science, Universitas Indonesia
 
-> Source code for [Let’s Build a Websocket Chat Project With Rust and Yew 0.19 🦀](https://fsjohnny.medium.com/lets-build-a-websockets-project-with-rust-and-yew-0-19-60720367399f)
+---
+## Reflection - Yew Webchat 🦀
 
-## Install
+---
+### 3.1. Original code
 
-1. Install the required toolchain dependencies:
-   ```npm i```
+Berikut adalah tampilan Yew Webchat setelah saya run dan coba mengirimkan pesan untuk 2 user pada window `localhost:8000` yang berbeda:
 
-2. Follow the YewChat post!
-
-## Branches
-
-This repository is divided to branches that correspond to the blog post sections:
-
-* main - The starter code.
-* routing - The code at the end of the Routing section.
-* components-part1 - The code at the end of the Components-Phase 1 section.
-* websockets - The code at the end of the Hello Websockets! section.
-* components-part2 - The code at the end of the Components-Phase 2 section.
-* websockets-part2 - The code at the end of the WebSockets-Phase 2 section.
+![](image/3.1.png)
